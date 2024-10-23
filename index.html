@@ -28,14 +28,46 @@
             padding: 10px 0;
         }
 
+        video {
+            width: 100%;
+            height: auto;
+        }
+
         /* iOS scroll bounce prevention */
         body {
             overscroll-behavior: none; /* Prevents the scroll bounce */
             touch-action: pan-x pan-y;
         }
     </style>
-    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
     <script src="./js/main.js" async></script>
+    <script type="text/javascript" src="./js/jsqrscanner.nocache.js"></script>
+    <script type="text/javascript">
+        function onQRCodeScanned(scannedText)
+        {
+            var scannedTextMemo = document.getElementById("scannedTextMemo");
+            if(scannedTextMemo)
+            {
+                scannedTextMemo.value = scannedText;
+            }
+        }
+      
+        //this function will be called when JsQRScanner is ready to use
+        function JsQRScannerReady()
+        {
+            //create a new scanner passing to it a callback function that will be invoked when
+            //the scanner succesfully scan a QR code
+            var jbScanner = new JsQRScanner(onQRCodeScanned);
+            //reduce the size of analyzed images to increase performance on mobile devices
+            jbScanner.setSnapImageMaxSize(300);
+            var scannerParentElement = document.getElementById("scanner");
+            if(scannerParentElement)
+            {
+                //append the jbScanner to an existing DOM element
+                jbScanner.appendTo(scannerParentElement);
+            }        
+        }
+      </script> 
 </head>
 <body>
     <div id="content">
@@ -47,6 +79,28 @@
         </div>
     
         <video id="video" playsinline autoplay></video>
+        <div class="row-element">
+        <div class="form-field form-field-memo">
+          <div class="form-field-caption-panel">
+            <div class="gwt-Label form-field-caption">
+              Scanned text
+            </div>
+          </div>
+          <div class="FlexPanel form-field-input-panel">
+            <textarea id="scannedTextMemo" class="textInput form-memo form-field-input textInput-readonly" rows="3" readonly="">            </textarea>
+          </div>
+        </div>
+        <div class="form-field form-field-memo">
+          <div class="form-field-caption-panel">
+            <div class="gwt-Label form-field-caption">
+              Scanned text history
+            </div>
+          </div>
+          <div class="FlexPanel form-field-input-panel">
+            <textarea id="scannedTextMemoHist" class="textInput form-memo form-field-input textInput-readonly" value="" rows="6" readonly="">            </textarea>
+          </div>
+        </div>
+      </div>
     </div>
 
     <footer>
