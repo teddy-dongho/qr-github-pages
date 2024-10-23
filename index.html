@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages Test</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        #content {
+            min-height: calc(100vh - 60px); /* Adjust for the footer height */
+            padding: 20px;
+        }
+
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* iOS scroll bounce prevention */
+        body {
+            overscroll-behavior: none; /* Prevents the scroll bounce */
+            touch-action: pan-x pan-y;
+        }
+    </style>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script type="text/javascript" src="./js/jsqrscanner.nocache.js"></script>
+    <script type="text/javascript" src="./js/main.js" async></script>
+</head>
+<body>
+    <div id="content">
+        <h1>Hello, GitHub Pages!</h1>
+        <p>This is a sample page with a fixed footer.</p>
+
+        <div class="select">
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        </div>
+    
+        <video id="video" playsinline autoplay></video>
+    </div>
+
+    <footer>
+        <p>Fixed Footer © 2024</p>
+    </footer>
+</body>
+</html>
