@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera and Input Form</title>
+    <title>Camera Selector and Input Form</title>
     <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: none;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -19,6 +25,7 @@
             overflow-y: auto;
             padding: 20px;
             padding-bottom: 60px; /* Add padding equal to the footer height */
+            pointer-events: all;
         }
 
         .footer {
@@ -30,7 +37,7 @@
             color: #fff;
             text-align: center;
             padding: 10px;
-            height: 40px;
+            height: 40px; /* Set a fixed height */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -61,16 +68,26 @@
             margin-bottom: 5px;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
+            pointer-events: all;
+        }
+
+        .camera-selector {
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="content">
         <h2>Camera Preview</h2>
+        <!-- Camera selector -->
+        <div class="camera-selector">
+            <label for="cameraSelect">Choose Camera:</label>
+            <select id="cameraSelect"></select>
+        </div>
         <video id="video" width="100%" height="300" autoplay></video>
 
         <h2>Scrollable List</h2>
@@ -105,29 +122,77 @@
     </div>
 
     <script>
-        // Try to access the rear camera if available
         const video = document.getElementById('video');
-        const constraints = {
-            video: {
-                facingMode: { ideal: 'environment' } // Try to use rear camera
-            }
-        };
+        const cameraSelect = document.getElementById('cameraSelect');
+        let stream;
 
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(function(stream) {
-                video.srcObject = stream;
+        // Function to stop any previously active video streams
+        function stopStream() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        // Load available cameras and populate the selector
+        navigator.mediaDevices.enumerateDevices()
+            .then(function(devices) {
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                // Add each video device to the select element
+                videoDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+
+                // Set the default camera as the first video device found
+                if (videoDevices.length > 0) {
+                    setCameraStream(videoDevices[0].deviceId);
+                }
             })
-            .catch(function(error) {
-                console.error('Error accessing the camera:', error);
-                // Fallback to the default camera if rear is not available
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(function(stream) {
-                        video.srcObject = stream;
-                    })
-                    .catch(function(err) {
-                        console.error('Error accessing the default camera:', err);
-                    });
+            .catch(function(err) {
+                console.error('Error listing devices:', err);
             });
+
+        // Function to start video stream from selected camera
+        function setCameraStream(deviceId) {
+            stopStream(); // Stop the previous stream if any
+
+            const constraints = {
+                video: {
+                    deviceId: { exact: deviceId }
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(function(mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = stream;
+                })
+                .catch(function(error) {
+                    if (error.name === 'OverconstrainedError') {
+                        console.error('The selected camera is not available:', error);
+                        // Fallback to the default camera
+                        navigator.mediaDevices.getUserMedia({ video: true })
+                            .then(function(mediaStream) {
+                                stream = mediaStream;
+                                video.srcObject = stream;
+                            })
+                            .catch(function(err) {
+                                console.error('Error accessing the default camera:', err);
+                            });
+                    } else {
+                        console.error('Error accessing the camera:', error);
+                    }
+                });
+        }
+
+        // When camera selection changes, switch to the selected camera
+        cameraSelect.addEventListener('change', function() {
+            const selectedDeviceId = cameraSelect.value;
+            setCameraStream(selectedDeviceId);
+        });
     </script>
 </body>
 </html>
