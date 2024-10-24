@@ -68,7 +68,7 @@ function start() {
   }
   videoSource = videoSelect.value;
   const constraints = {
-    video: { deviceId: videoSource ? { exact: videoSource } : undefined },
+    video: { facingMode: { exact: "environment" } },
   };
   navigator.mediaDevices
     .getUserMedia(constraints)
@@ -78,39 +78,6 @@ function start() {
 };
 
 videoSelect.onchange = start;
+videoSelect.onclick = start;
 
 start();
-
-function onQRCodeScanned(scannedText) {
-  var scannedTextMemo = document.getElementById("scannedTextMemo");
-  if (scannedTextMemo) {
-    scannedTextMemo.value = scannedText;
-  }
-}
-
-//funtion returning a promise with a video stream
-function provideVideoQQ() {
-  return navigator.mediaDevices.getUserMedia({
-    video: {
-      optional: [
-        {
-          sourceId: videoSource ? { exact: videoSource } : undefined,
-        },
-      ],
-    },
-  });
-}
-
-//this function will be called when JsQRScanner is ready to use
-function JsQRScannerReady() {
-  //create a new scanner passing to it a callback function that will be invoked when
-  //the scanner succesfully scan a QR code
-  var jbScanner = new JsQRScanner(onQRCodeScanned, provideVideoQQ);
-  //reduce the size of analyzed images to increase performance on mobile devices
-  jbScanner.setSnapImageMaxSize(300);
-  var scannerParentElement = document.getElementById("scanner");
-  if (scannerParentElement) {
-    //append the jbScanner to an existing DOM element
-    jbScanner.appendTo(scannerParentElement);
-  }
-}

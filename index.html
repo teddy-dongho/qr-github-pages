@@ -1,110 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pages Test</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow-x: hidden;
-        }
-
-        #content {
-            min-height: calc(100vh - 60px); /* Adjust for the footer height */
-            padding: 20px;
-        }
-
-        footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        video {
-            width: 100%;
-            height: auto;
-        }
-
-        /* iOS scroll bounce prevention */
-        body {
-            overscroll-behavior: none; /* Prevents the scroll bounce */
-            touch-action: pan-x pan-y;
-        }
-    </style>
-    <!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
-    <script src="./js/main.js" async></script>
-    <script type="text/javascript" src="./js/jsqrscanner.nocache.js"></script>
-    <script type="text/javascript">
-        function onQRCodeScanned(scannedText)
-        {
-            var scannedTextMemo = document.getElementById("scannedTextMemo");
-            if(scannedTextMemo)
-            {
-                scannedTextMemo.value = scannedText;
-            }
-        }
-      
-        //this function will be called when JsQRScanner is ready to use
-        function JsQRScannerReady()
-        {
-            //create a new scanner passing to it a callback function that will be invoked when
-            //the scanner succesfully scan a QR code
-            var jbScanner = new JsQRScanner(onQRCodeScanned);
-            //reduce the size of analyzed images to increase performance on mobile devices
-            jbScanner.setSnapImageMaxSize(300);
-            var scannerParentElement = document.getElementById("scanner");
-            if(scannerParentElement)
-            {
-                //append the jbScanner to an existing DOM element
-                jbScanner.appendTo(scannerParentElement);
-            }        
-        }
-      </script> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera Selector</title>
+  <style>
+    video {
+      width: 100%;
+      max-width: 600px;
+    }
+    select {
+      margin-bottom: 10px;
+    }
+    /* 고정된 footer 스타일 */
+    footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
 </head>
 <body>
-    <div id="content">
-        <h1>Hello, GitHub Pages!</h1>
-        <p>This is a sample page with a fixed footer.</p>
 
-        <div class="select">
-            <label for="videoSource">Video source: </label><select id="videoSource"></select>
-        </div>
-    
-        <video id="video" playsinline autoplay></video>
-        <div class="row-element">
-        <div class="form-field form-field-memo">
-          <div class="form-field-caption-panel">
-            <div class="gwt-Label form-field-caption">
-              Scanned text
-            </div>
-          </div>
-          <div class="FlexPanel form-field-input-panel">
-            <textarea id="scannedTextMemo" class="textInput form-memo form-field-input textInput-readonly" rows="3" readonly="">            </textarea>
-          </div>
-        </div>
-        <div class="form-field form-field-memo">
-          <div class="form-field-caption-panel">
-            <div class="gwt-Label form-field-caption">
-              Scanned text history
-            </div>
-          </div>
-          <div class="FlexPanel form-field-input-panel">
-            <textarea id="scannedTextMemoHist" class="textInput form-memo form-field-input textInput-readonly" value="" rows="6" readonly="">            </textarea>
-          </div>
-        </div>
-      </div>
-    </div>
+  <h1>Camera Selector</h1>
+  
+  <label for="cameraSelect">Choose a camera:</label>
+  <select id="cameraSelect"></select>
 
-    <footer>
-        <p>Fixed Footer © 2024</p>
-    </footer>
+  <label for="facingMode">Facing Mode:</label>
+  <select id="facingMode">
+    <option value="user">Front (User)</option>
+    <option value="environment">Back (Environment)</option>
+  </select>
+
+  <video autoplay playsinline></video>
+  
+  <p id="errorMessage" style="color: red;"></p>
+
+  <!-- 고정된 footer -->
+  <footer>
+    &copy; 2024 Camera App | All rights reserved
+  </footer>
+
+  <script>
+    const videoElement = document.getElementsByTagName('video')[0];
+    const cameraSelect = document.getElementById('cameraSelect');
+    const facingModeSelect = document.getElementById('facingMode');
+    const errorMessage = document.getElementById('errorMessage');
+    let currentStream = null;
+
+    // Request permission to access media devices
+    async function requestCameraPermission() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop()); // Close the stream
+        getCameras(); // Once permission is granted, load cameras
+      } catch (error) {
+        errorMessage.textContent = "Camera permission denied or error: " + error.message;
+        console.error("Camera permission error: ", error);
+      }
+    }
+
+    // Get available devices (cameras)
+    async function getCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        
+        if (videoDevices.length === 0) {
+          errorMessage.textContent = "No video devices found.";
+          return;
+        }
+
+        // Clear previous options
+        cameraSelect.innerHTML = '';
+
+        // Populate camera select options
+        videoDevices.forEach(device => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+          cameraSelect.appendChild(option);
+        });
+
+        if (videoDevices.length > 0) {
+          // Start with the first camera
+          startCamera();
+        }
+      } catch (error) {
+        errorMessage.textContent = "Error getting camera devices: " + error.message;
+        console.error("Error getting camera devices: ", error);
+      }
+    }
+
+    // Start camera based on selected options
+    async function startCamera(deviceId) {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+
+      const facingMode = facingModeSelect.value;
+
+      const constraints = {
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+          facingMode: facingMode || undefined
+        }
+      };
+
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElement.srcObject = currentStream;
+        errorMessage.textContent = ""; // Clear any previous error message
+      } catch (error) {
+        if (error.name === "OverconstrainedError") {
+          errorMessage.textContent = "No camera matching the constraints was found.";
+          console.error("OverconstrainedError: ", error);
+          startDefaultCamera(); // 기본 카메라로 다시 시도
+        } else {
+          errorMessage.textContent = "Error accessing camera: " + error.message;
+          console.error("Error accessing camera: ", error);
+        }
+      }
+    }
+
+    // 기본 카메라 사용
+    async function startDefaultCamera() {
+      try {
+        const defaultStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoElement.srcObject = defaultStream;
+        errorMessage.textContent = ""; // Clear error message
+      } catch (error) {
+        errorMessage.textContent = "Error accessing default camera: " + error.message;
+        console.error("Error accessing default camera: ", error);
+      }
+    }
+
+    // Listen for camera or facing mode changes
+    cameraSelect.addEventListener('change', () => startCamera(cameraSelect.value));
+    facingModeSelect.addEventListener('change', () => startCamera(cameraSelect.value));
+
+    // On page load, request camera permission and get cameras
+    window.onload = requestCameraPermission;
+  </script>
+
 </body>
 </html>
