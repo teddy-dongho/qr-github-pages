@@ -38,36 +38,36 @@
             overscroll-behavior: none; /* Prevents the scroll bounce */
             touch-action: pan-x pan-y;
         }
+
+        .list-box {
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .list-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list-box ul li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
     </style>
-    <!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
     <script src="./js/main.js" async></script>
-    <script type="text/javascript" src="./js/jsqrscanner.nocache.js"></script>
-    <script type="text/javascript">
-        function onQRCodeScanned(scannedText)
-        {
-            var scannedTextMemo = document.getElementById("scannedTextMemo");
-            if(scannedTextMemo)
-            {
-                scannedTextMemo.value = scannedText;
-            }
-        }
-      
-        //this function will be called when JsQRScanner is ready to use
-        function JsQRScannerReady()
-        {
-            //create a new scanner passing to it a callback function that will be invoked when
-            //the scanner succesfully scan a QR code
-            var jbScanner = new JsQRScanner(onQRCodeScanned);
-            //reduce the size of analyzed images to increase performance on mobile devices
-            jbScanner.setSnapImageMaxSize(300);
-            var scannerParentElement = document.getElementById("scanner");
-            if(scannerParentElement)
-            {
-                //append the jbScanner to an existing DOM element
-                jbScanner.appendTo(scannerParentElement);
-            }        
-        }
-      </script> 
 </head>
 <body>
     <div id="content">
@@ -75,32 +75,60 @@
         <p>This is a sample page with a fixed footer.</p>
 
         <div class="select">
-            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+            <label for="videoSource">Video source: </label>
+            <select id="videoSource"></select>
         </div>
-    
+
         <video id="video" playsinline autoplay></video>
+
+        <h2>Scrollable List</h2>
+        <div class="list-box">
+            <ul id="listItems">
+                <!-- Dynamically creating 50 list items -->
+                <script>
+                    for (let i = 1; i <= 50; i++) {
+                        document.write(`<li>Item ${i}</li>`);
+                    }
+                </script>
+            </ul>
+        </div>
+
+        <h2>Input Form</h2>
+        <div class="input-group">
+            <label for="text">Text Input</label>
+            <input type="text" id="text" placeholder="Enter text">
+        </div>
+        <div class="input-group">
+            <label for="email">Email Input</label>
+            <input type="email" id="email" placeholder="Enter email">
+        </div>
+        <div class="input-group">
+            <label for="number">Number Input</label>
+            <input type="number" id="number" placeholder="Enter number">
+        </div>
+
         <div class="row-element">
-        <div class="form-field form-field-memo">
-          <div class="form-field-caption-panel">
-            <div class="gwt-Label form-field-caption">
-              Scanned text
+            <div class="form-field form-field-memo">
+                <div class="form-field-caption-panel">
+                    <div class="gwt-Label form-field-caption">
+                        Scanned text
+                    </div>
+                </div>
+                <div class="FlexPanel form-field-input-panel">
+                    <textarea id="scannedTextMemo" class="textInput form-memo form-field-input textInput-readonly" rows="3" readonly="">            </textarea>
+                </div>
             </div>
-          </div>
-          <div class="FlexPanel form-field-input-panel">
-            <textarea id="scannedTextMemo" class="textInput form-memo form-field-input textInput-readonly" rows="3" readonly="">            </textarea>
-          </div>
-        </div>
-        <div class="form-field form-field-memo">
-          <div class="form-field-caption-panel">
-            <div class="gwt-Label form-field-caption">
-              Scanned text history
+            <div class="form-field form-field-memo">
+                <div class="form-field-caption-panel">
+                    <div class="gwt-Label form-field-caption">
+                        Scanned text history
+                    </div>
+                </div>
+                <div class="FlexPanel form-field-input-panel">
+                    <textarea id="scannedTextMemoHist" class="textInput form-memo form-field-input textInput-readonly" value="" rows="6" readonly="">            </textarea>
+                </div>
             </div>
-          </div>
-          <div class="FlexPanel form-field-input-panel">
-            <textarea id="scannedTextMemoHist" class="textInput form-memo form-field-input textInput-readonly" value="" rows="6" readonly="">            </textarea>
-          </div>
         </div>
-      </div>
     </div>
 
     <footer>

@@ -1,19 +1,12 @@
-/*
- *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
-
 "use strict";
 
 const videoElement = document.querySelector("video");
-const videoSelect = document.querySelector("select#videoSource");
+const videoSelect = document.getElementById('videoSource');
 const selectors = [videoSelect];
+let stream;
 
+// 가져온 장치 목록을 업데이트하는 함수
 function gotDevices(deviceInfos) {
-  // Handles being called several times to update labels. Preserve values.
   const values = selectors.map((select) => select.value);
   selectors.forEach((select) => {
     while (select.firstChild) {
@@ -25,10 +18,8 @@ function gotDevices(deviceInfos) {
     const option = document.createElement("option");
     option.value = deviceInfo.deviceId;
     if (deviceInfo.kind === "videoinput") {
-      option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+      option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
       videoSelect.appendChild(option);
-    } else {
-      console.log("Some other kind of source/device: ", deviceInfo);
     }
   }
   selectors.forEach((select, selectorIndex) => {
@@ -42,31 +33,24 @@ function gotDevices(deviceInfos) {
   });
 }
 
-navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
-
+// 카메라 스트림 설정
 function gotStream(stream) {
-  window.stream = stream; // make stream available to console
-  videoElement.srcObject = stream;
-  // Refresh button list in case labels have become available
+  window.stream = stream; // 스트림을 전역에서 사용할 수 있도록 설정
+  videoElement.srcObject = stream; // 비디오 요소에 스트림 할당
   return navigator.mediaDevices.enumerateDevices();
 }
 
+// 오류 처리 함수
 function handleError(error) {
-  console.log(
-    "navigator.MediaDevices.getUserMedia error: ",
-    error.message,
-    error.name
-  );
+  console.error("navigator.MediaDevices.getUserMedia error: ", error.message, error.name);
 }
 
-let videoSource;
+// 카메라 선택 후 스트림 시작
 function start() {
   if (window.stream) {
-    window.stream.getTracks().forEach((track) => {
-      track.stop();
-    });
+    window.stream.getTracks().forEach((track) => track.stop());
   }
-  videoSource = videoSelect.value;
+  const videoSource = videoSelect.value;
   const constraints = {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
@@ -75,42 +59,101 @@ function start() {
     .then(gotStream)
     .then(gotDevices)
     .catch(handleError);
-};
+}
 
+// 비디오 장치 선택 변경 시 호출
 videoSelect.onchange = start;
 
-start();
+// 장치 목록 가져오기
+navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
+// QR 코드 스캔 시 호출되는 함수
 function onQRCodeScanned(scannedText) {
-  var scannedTextMemo = document.getElementById("scannedTextMemo");
+  const scannedTextMemo = document.getElementById("scannedTextMemo");
   if (scannedTextMemo) {
     scannedTextMemo.value = scannedText;
   }
 }
 
-//funtion returning a promise with a video stream
+// 비디오 스트림을 제공하는 함수
 function provideVideoQQ() {
+  const videoSource = videoSelect.value;
   return navigator.mediaDevices.getUserMedia({
     video: {
-      optional: [
-        {
-          sourceId: videoSource ? { exact: videoSource } : undefined,
-        },
-      ],
+      deviceId: videoSource ? { exact: videoSource } : undefined,
     },
   });
 }
 
-//this function will be called when JsQRScanner is ready to use
+// JsQRScanner 초기화 함수
 function JsQRScannerReady() {
-  //create a new scanner passing to it a callback function that will be invoked when
-  //the scanner succesfully scan a QR code
-  var jbScanner = new JsQRScanner(onQRCodeScanned, provideVideoQQ);
-  //reduce the size of analyzed images to increase performance on mobile devices
+  const jbScanner = new JsQRScanner(onQRCodeScanned, provideVideoQQ);
   jbScanner.setSnapImageMaxSize(300);
-  var scannerParentElement = document.getElementById("scanner");
+  const scannerParentElement = document.getElementById("scanner");
   if (scannerParentElement) {
-    //append the jbScanner to an existing DOM element
     jbScanner.appendTo(scannerParentElement);
   }
 }
+
+function stopStream() {
+  if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+// Get the available video input devices (cameras)
+function getCameras() {
+  navigator.mediaDevices.enumerateDevices()
+      .then(function(devices) {
+          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+          videoDevices.forEach(device => {
+              const option = document.createElement('option');
+              option.value = device.deviceId;
+              option.text = device.label || `Camera ${videoSelect.length + 1}`;
+              videoSelect.appendChild(option);
+          });
+
+          // Try to select a camera with "back" in the label, otherwise select the first one
+          const backCamera = Array.from(videoSelect.options).find(option => option.text.toLowerCase().includes('back'));
+          if (backCamera) {
+              videoSelect.value = backCamera.value;
+          }
+
+          setCameraStream(videoSelect.value); // Set initial camera
+      })
+      .catch(function(err) {
+          console.error('Error enumerating devices:', err);
+      });
+}
+
+// Set the video stream from the selected camera
+function setCameraStream(deviceId) {
+  stopStream(); // Stop previous stream if any
+
+  const constraints = {
+      video: {
+          deviceId: { exact: deviceId }
+      }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
+      .then(function(mediaStream) {
+          stream = mediaStream;
+          video.srcObject = stream;
+      })
+      .catch(function(err) {
+          console.error('Error accessing the camera:', err);
+      });
+}
+
+// Event listener for camera selection change
+videoSelect.addEventListener('change', function() {
+  setCameraStream(videoSelect.value);
+});
+
+// Start the camera selection process
+getCameras();
+
+// 페이지가 로드되면 초기 스트림 설정 시작
+start();
