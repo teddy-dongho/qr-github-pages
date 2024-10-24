@@ -122,77 +122,82 @@
     </div>
 
     <script>
-        const video = document.getElementById('video');
-        const cameraSelect = document.getElementById('cameraSelect');
-        let stream;
+    const video = document.getElementById('video');
+    const cameraSelect = document.getElementById('cameraSelect');
+    let stream;
 
-        // Function to stop any previously active video streams
-        function stopStream() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
+    // Function to stop any previously active video streams
+    function stopStream() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
         }
+    }
 
-        // Load available cameras and populate the selector
-        navigator.mediaDevices.enumerateDevices()
-            .then(function(devices) {
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                
-                // Add each video device to the select element
-                videoDevices.forEach(device => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || `Camera ${cameraSelect.length + 1}`;
-                    cameraSelect.appendChild(option);
-                });
-
-                // Set the default camera as the first video device found
-                if (videoDevices.length > 0) {
-                    setCameraStream(videoDevices[0].deviceId);
-                }
-            })
-            .catch(function(err) {
-                console.error('Error listing devices:', err);
+    // Load available cameras and populate the selector
+    navigator.mediaDevices.enumerateDevices()
+        .then(function(devices) {
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            // Add each video device to the select element
+            videoDevices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+                cameraSelect.appendChild(option);
             });
 
-        // Function to start video stream from selected camera
-        function setCameraStream(deviceId) {
-            stopStream(); // Stop the previous stream if any
-
-            const constraints = {
-                video: {
-                    deviceId: { exact: deviceId }
-                }
-            };
-
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(function(mediaStream) {
-                    stream = mediaStream;
-                    video.srcObject = stream;
-                })
-                .catch(function(error) {
-                    if (error.name === 'OverconstrainedError') {
-                        console.error('The selected camera is not available:', error);
-                        // Fallback to the default camera
-                        navigator.mediaDevices.getUserMedia({ video: true })
-                            .then(function(mediaStream) {
-                                stream = mediaStream;
-                                video.srcObject = stream;
-                            })
-                            .catch(function(err) {
-                                console.error('Error accessing the default camera:', err);
-                            });
-                    } else {
-                        console.error('Error accessing the camera:', error);
-                    }
-                });
-        }
-
-        // When camera selection changes, switch to the selected camera
-        cameraSelect.addEventListener('change', function() {
-            const selectedDeviceId = cameraSelect.value;
-            setCameraStream(selectedDeviceId);
+            // Set the default camera as the first video device found
+            if (videoDevices.length > 0) {
+                setCameraStream(videoDevices[0].deviceId);
+            }
+        })
+        .catch(function(err) {
+            console.error('Error listing devices:', err);
         });
+
+    // Function to start video stream from selected camera
+    function setCameraStream(deviceId) {
+        stopStream(); // Stop the previous stream if any
+
+        const constraints = {
+            video: {
+                deviceId: deviceId ? { exact: deviceId } : undefined
+            }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(function(mediaStream) {
+                stream = mediaStream;
+                video.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.error('Error accessing the camera:', error);
+                if (error.name === 'OverconstrainedError') {
+                    console.error('The selected camera is not available:', error);
+                    // Fallback to the default camera if specific device ID fails
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(function(mediaStream) {
+                            stream = mediaStream;
+                            video.srcObject = stream;
+                        })
+                        .catch(function(err) {
+                            console.error('Error accessing the default camera:', err);
+                        });
+                }
+            });
+    }
+
+    // When camera selection changes, switch to the selected camera
+    cameraSelect.addEventListener('change', function() {
+        const selectedDeviceId = cameraSelect.value;
+        setCameraStream(selectedDeviceId);
+    });
+
+    // For iOS, check if we are using Safari and handle it accordingly
+    if (navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+        navigator.userAgent && !navigator.userAgent.match('CriOS')) {
+        console.log('Running on iOS Safari, please ensure permissions are granted');
+    }
     </script>
 </body>
 </html>
