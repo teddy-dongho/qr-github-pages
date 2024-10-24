@@ -69,6 +69,8 @@ function start() {
   videoSource = videoSelect.value;
   const constraints = {
     video: { facingMode: { exact: "environment" } },
+
+    video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
   navigator.mediaDevices
     .getUserMedia(constraints)
@@ -78,6 +80,5 @@ function start() {
 };
 
 videoSelect.onchange = start;
-videoSelect.onclick = start;
 
 start();
