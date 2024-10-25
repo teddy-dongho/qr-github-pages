@@ -33,11 +33,41 @@ function gotDevices(deviceInfos) {
   });
 }
 
+
+function getDevices() {
+  return new Promise((resolve, reject) => {
+    if (window.devices != undefined) {
+      console.log('window.devices', window.devices);
+      resolve(window.devices);
+    } else {
+      return navigator.mediaDevices.enumerateDevices().then(devices => {
+        window.devices = devices;
+        console.log('devices', devices);
+        resolve(devices);
+      }).catch(e => reject(e));
+    }
+  });
+}
+
 // 카메라 스트림 설정
 function gotStream(stream) {
-  window.stream = stream; // 스트림을 전역에서 사용할 수 있도록 설정
   videoElement.srcObject = stream; // 비디오 요소에 스트림 할당
-  return navigator.mediaDevices.enumerateDevices();
+  return getDevices();
+}
+
+function getUserMedia() {
+  return new Promise((resolve, reject) => {
+    if (window.stream != undefined) {
+      console.log('window.stream', window.stream);
+      resolve(window.stream);
+    } else {
+      return navigator.mediaDevices.getUserMedia(getConstrains()).then((mediaStream) => {
+        console.log('mediaStream', mediaStream);
+        window.stream = mediaStream;
+        resolve(mediaStream);
+      }).catch(e => reject(e));
+    }
+  });
 }
 
 async function applyTorch() {
@@ -84,8 +114,7 @@ function getConstrains() {
 // 카메라 선택 후 스트림 시작
 function start() {
   stopStream();
-  return navigator.mediaDevices
-    .getUserMedia(getConstrains())
+  return getUserMedia()
     .then(gotStream)
     .then(gotDevices)
     .then(applyTorch)
@@ -95,9 +124,6 @@ function start() {
 // 비디오 장치 선택 변경 시 호출
 videoSelect.onchange = start;
 
-// 장치 목록 가져오기
-navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
-
 function stopStream() {
   if (window.stream) {
     window.stream.getTracks().forEach((track) => track.stop());
@@ -106,12 +132,12 @@ function stopStream() {
 
 // Get the available video input devices (cameras)
 function getCameras() {
-  return navigator.mediaDevices
-    .enumerateDevices()
+  return getDevices()
     .then(function (devices) {
       const videoDevices = devices.filter(
         (device) => device.kind === "videoinput"
       );
+      console.log('videoDevices', videoDevices);
 
       videoDevices.forEach((device) => {
         const option = document.createElement("option");
@@ -126,25 +152,9 @@ function getCameras() {
       if (backCamera) {
         videoSelect.value = backCamera.value;
       }
-
-      setCameraStream(videoSelect.value);
     })
     .catch(function (err) {
       console.error("Error enumerating devices:", err);
-    });
-}
-
-// Set the video stream from the selected camera
-function setCameraStream(deviceId) {
-  stopStream(); // Stop previous stream if any
-  const userMediaPromise = navigator.mediaDevices.getUserMedia(getConstrains())
-  userMediaPromise
-    .then(function (mediaStream) {
-      window.stream = mediaStream;
-      video.srcObject = window.stream;
-    })
-    .catch(function (err) {
-      console.error("Error accessing the camera:", err);
     });
 }
 
