@@ -61,18 +61,23 @@ function gotStream(stream) {
 }
 
 function getUserMedia(source) {
-  return new Promise((resolve, reject) => {
-    if (window.stream != undefined) {
-      console.log('window.stream', window.stream);
-      resolve(window.stream);
-    } else {
-      return navigator.mediaDevices.getUserMedia(getConstrains(source)).then((mediaStream) => {
-        console.log('mediaStream', mediaStream);
-        window.stream = mediaStream;
-        resolve(mediaStream);
-      }).catch(e => reject(e));
-    }
-  });
+  return navigator.mediaDevices.getUserMedia(getConstrains(source)).then((mediaStream) => {
+    console.log('mediaStream', mediaStream);
+    window.stream = mediaStream;
+    return mediaStream;
+  })
+  // return new Promise((resolve, reject) => {
+  //   if (window.stream != undefined) {
+  //     console.log('window.stream', window.stream);
+  //     resolve(window.stream);
+  //   } else {
+  //     return navigator.mediaDevices.getUserMedia(getConstrains(source)).then((mediaStream) => {
+  //       console.log('mediaStream', mediaStream);
+  //       window.stream = mediaStream;
+  //       resolve(mediaStream);
+  //     }).catch(e => reject(e));
+  //   }
+  // });
 }
 
 async function applyTorch() {
