@@ -87,23 +87,31 @@ async function applyTorch() {
   console.log("capabilities.torch", capabilities.torch);
   if (capabilities.torch) {
     toggleTorchButton.addEventListener("click", () => {
-      if (track) {
-        addLogMessage('toggle');
-        const torchState = track.getSettings().torch || false;
-        track.applyConstraints({
-          advanced: [{ torch: !torchState }],
-        });
-      } else {
-        addLogMessage('track에 torch가 없습니다');
-        alert("track에 torch가 없습니다");
+      try {
+        if (track) {
+          addLogMessage('toggle');
+          const torchState = track.getSettings().torch || false;
+          track.applyConstraints({
+            advanced: [{ torch: !torchState }],
+          });
+        } else {
+          addLogMessage('track에 torch가 없습니다');
+          alert("track에 torch가 없습니다");
+        }
+      } catch (e) {
+        addLogMessage(e);
       }
     });
   } else {
     console.log("This device does not support torch functionality.");
-    toggleTorchButton.addEventListener("click", () => {
-      addLogMessage("torch가 지원되지 않습니다");
-      alert("torch가 지원되지 않습니다");
-    });
+    try {
+      toggleTorchButton.addEventListener("click", () => {
+        addLogMessage("torch가 지원되지 않습니다");
+        alert("torch가 지원되지 않습니다");
+      });
+    } catch (e) {
+      addLogMessage(e);
+    }
   }
 }
 
