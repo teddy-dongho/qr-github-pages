@@ -2,6 +2,7 @@
 
 const videoElement = document.querySelector("video");
 const videoSelect = document.getElementById('videoSource');
+const toggleTorchButton = document.getElementById('toggle-torch');
 const selectors = [videoSelect];
 let stream;
 
@@ -37,7 +38,36 @@ function gotDevices(deviceInfos) {
 function gotStream(stream) {
   window.stream = stream; // 스트림을 전역에서 사용할 수 있도록 설정
   videoElement.srcObject = stream; // 비디오 요소에 스트림 할당
+  const track = stream.getVideoTracks()[0];
+  const imageCapture = new ImageCapture(track);
   return navigator.mediaDevices.enumerateDevices();
+}
+
+// 카메라 플래시 설정
+function gotStream(stream) {
+  window.stream = stream; // 스트림을 전역에서 사용할 수 있도록 설정
+  videoElement.srcObject = stream; // 비디오 요소에 스트림 할당
+  return navigator.mediaDevices.enumerateDevices();
+}
+
+async function applyTorch() {
+  const track = window.stream.getVideoTracks()[0];
+  const imageCapture = new ImageCapture(track);
+  const capabilities = await imageCapture.getPhotoCapabilities();
+  console.log('capabilities.torch', capabilities.torch);
+  if (capabilities.torch) {
+      toggleTorchButton.style.display = 'block';
+      toggleTorchButton.addEventListener('click', () => {
+        if (track) {
+            const torchState = track.getSettings().torch || false;
+            track.applyConstraints({
+                advanced: [{ torch: !torchState }]
+            });
+        }
+    });
+  } else {
+      console.log("This device does not support torch functionality.");
+  }
 }
 
 // 오류 처리 함수
@@ -58,6 +88,7 @@ function start() {
     .getUserMedia(constraints)
     .then(gotStream)
     .then(gotDevices)
+    .then(applyTorch)
     .catch(handleError);
 }
 
