@@ -1,8 +1,8 @@
 "use strict";
 
 const videoElement = document.querySelector("video");
-const videoSelect = document.getElementById('videoSource');
-const toggleTorchButton = document.getElementById('toggle-torch');
+const videoSelect = document.getElementById("videoSource");
+const toggleTorchButton = document.getElementById("toggle-torch");
 const selectors = [videoSelect];
 let stream;
 
@@ -54,25 +54,33 @@ async function applyTorch() {
   const track = window.stream.getVideoTracks()[0];
   const imageCapture = new ImageCapture(track);
   const capabilities = await imageCapture.getPhotoCapabilities();
-  console.log('capabilities.torch', capabilities.torch);
+  console.log("capabilities.torch", capabilities.torch);
   if (capabilities.torch) {
-      toggleTorchButton.style.display = 'block';
-      toggleTorchButton.addEventListener('click', () => {
-        if (track) {
-            const torchState = track.getSettings().torch || false;
-            track.applyConstraints({
-                advanced: [{ torch: !torchState }]
-            });
-        }
+    toggleTorchButton.addEventListener("click", () => {
+      if (track) {
+        const torchState = track.getSettings().torch || false;
+        track.applyConstraints({
+          advanced: [{ torch: !torchState }],
+        });
+      } else {
+        alert("track에 torch가 없습니다");
+      }
     });
   } else {
-      console.log("This device does not support torch functionality.");
+    console.log("This device does not support torch functionality.");
+    toggleTorchButton.addEventListener("click", () => {
+      alert("torch가 지원되지 않습니다");
+    });
   }
 }
 
 // 오류 처리 함수
 function handleError(error) {
-  console.error("navigator.MediaDevices.getUserMedia error: ", error.message, error.name);
+  console.error(
+    "navigator.MediaDevices.getUserMedia error: ",
+    error.message,
+    error.name
+  );
 }
 
 // 카메라 선택 후 스트림 시작
@@ -128,34 +136,39 @@ function JsQRScannerReady() {
 
 function stopStream() {
   if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+    stream.getTracks().forEach((track) => track.stop());
   }
 }
 
 // Get the available video input devices (cameras)
 function getCameras() {
-  navigator.mediaDevices.enumerateDevices()
-      .then(function(devices) {
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+  navigator.mediaDevices
+    .enumerateDevices()
+    .then(function (devices) {
+      const videoDevices = devices.filter(
+        (device) => device.kind === "videoinput"
+      );
 
-          videoDevices.forEach(device => {
-              const option = document.createElement('option');
-              option.value = device.deviceId;
-              option.text = device.label || `Camera ${videoSelect.length + 1}`;
-              videoSelect.appendChild(option);
-          });
-
-          // Try to select a camera with "back" in the label, otherwise select the first one
-          const backCamera = Array.from(videoSelect.options).find(option => option.text.toLowerCase().includes('back'));
-          if (backCamera) {
-              videoSelect.value = backCamera.value;
-          }
-
-          setCameraStream(videoSelect.value); // Set initial camera
-      })
-      .catch(function(err) {
-          console.error('Error enumerating devices:', err);
+      videoDevices.forEach((device) => {
+        const option = document.createElement("option");
+        option.value = device.deviceId;
+        option.text = device.label || `Camera ${videoSelect.length + 1}`;
+        videoSelect.appendChild(option);
       });
+
+      // Try to select a camera with "back" in the label, otherwise select the first one
+      const backCamera = Array.from(videoSelect.options).find((option) =>
+        option.text.toLowerCase().includes("back")
+      );
+      if (backCamera) {
+        videoSelect.value = backCamera.value;
+      }
+
+      setCameraStream(videoSelect.value); // Set initial camera
+    })
+    .catch(function (err) {
+      console.error("Error enumerating devices:", err);
+    });
 }
 
 // Set the video stream from the selected camera
@@ -163,23 +176,24 @@ function setCameraStream(deviceId) {
   stopStream(); // Stop previous stream if any
 
   const constraints = {
-      video: {
-          deviceId: { exact: deviceId }
-      }
+    video: {
+      deviceId: { exact: deviceId },
+    },
   };
 
-  navigator.mediaDevices.getUserMedia(constraints)
-      .then(function(mediaStream) {
-          stream = mediaStream;
-          video.srcObject = stream;
-      })
-      .catch(function(err) {
-          console.error('Error accessing the camera:', err);
-      });
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then(function (mediaStream) {
+      stream = mediaStream;
+      video.srcObject = stream;
+    })
+    .catch(function (err) {
+      console.error("Error accessing the camera:", err);
+    });
 }
 
 // Event listener for camera selection change
-videoSelect.addEventListener('change', function() {
+videoSelect.addEventListener("change", function () {
   setCameraStream(videoSelect.value);
 });
 
