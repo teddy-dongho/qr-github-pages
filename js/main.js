@@ -35,6 +35,11 @@ function gotDevices(deviceInfos) {
 
 
 function getDevices() {
+  return navigator.mediaDevices.enumerateDevices().then(devices => {
+    window.devices = devices;
+    console.log('devices', devices);
+    return devices;
+  });
   return new Promise((resolve, reject) => {
     if (window.devices != undefined) {
       console.log('window.devices', window.devices);
