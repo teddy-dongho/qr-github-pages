@@ -88,6 +88,7 @@ async function applyTorch() {
   if (capabilities.torch) {
     toggleTorchButton.addEventListener("click", () => {
       if (track) {
+        alert('toggle');
         const torchState = track.getSettings().torch || false;
         track.applyConstraints({
           advanced: [{ torch: !torchState }],
@@ -122,9 +123,9 @@ function getConstrains(source) {
 }
 
 // 카메라 선택 후 스트림 시작
-function start() {
+function start(source) {
   stopStream();
-  return getUserMedia(videoSelect.value)
+  return getUserMedia(source)
     .then(gotStream)
     .then(gotDevices)
     .then(applyTorch)
@@ -132,7 +133,7 @@ function start() {
 }
 
 // 비디오 장치 선택 변경 시 호출
-videoSelect.onchange = start;
+videoSelect.onchange = () => start();
 
 function stopStream() {
   if (window.stream) {
@@ -189,4 +190,13 @@ function setCameraStream(source) {
 // });
 
 // Start the camera selection process
-getCameras().then(start);
+getCameras().then(start).then(() => {
+  const backCamera = Array.from(videoSelect.options).find((option) =>
+    option.text.toLowerCase().includes("Back") || option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
+  );
+  if (backCamera) {
+    videoSelect.value = backCamera.value;
+  }
+
+  start(backCamera);
+});
