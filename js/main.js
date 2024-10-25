@@ -60,13 +60,13 @@ function gotStream(stream) {
   return getDevices();
 }
 
-function getUserMedia() {
+function getUserMedia(source) {
   return new Promise((resolve, reject) => {
     if (window.stream != undefined) {
       console.log('window.stream', window.stream);
       resolve(window.stream);
     } else {
-      return navigator.mediaDevices.getUserMedia(getConstrains()).then((mediaStream) => {
+      return navigator.mediaDevices.getUserMedia(getConstrains(source)).then((mediaStream) => {
         console.log('mediaStream', mediaStream);
         window.stream = mediaStream;
         resolve(mediaStream);
@@ -108,14 +108,8 @@ function handleError(error) {
   );
 }
 
-function getConstrains() {
-  const backCamera = Array.from(videoSelect.options).find((option) =>
-    option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
-  );
-  if (backCamera) {
-    videoSelect.value = backCamera.value;
-  }
-  const videoSource = videoSelect.value;
+function getConstrains(source) {
+  const videoSource = source || videoSelect.value;
   const constraints = {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
@@ -157,7 +151,14 @@ function getCameras() {
         videoSelect.appendChild(option);
       });
 
-      setCameraStream();
+      const backCamera = Array.from(videoSelect.options).find((option) =>
+        option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
+      );
+      if (backCamera) {
+        videoSelect.value = backCamera.value;
+      }
+
+      setCameraStream(backCamera);
     })
     .catch(function (err) {
       console.error("Error enumerating devices:", err);
@@ -165,9 +166,9 @@ function getCameras() {
 }
 
 // Set the video stream from the selected camera
-function setCameraStream() {
+function setCameraStream(source) {
   stopStream(); // Stop previous stream if any
-  getUserMedia()
+  getUserMedia(source)
     .then(function (mediaStream) {
       video.srcObject = mediaStream;
     })
