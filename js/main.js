@@ -201,8 +201,8 @@ getCameras().then(start).then(() => {
     videoSelect.value = backCamera.value;
   }
 
-  start(backCamera.value);
-});
+  addLogMessage("backCamera: " + backCamera.value);
+}).then(start);
 
 function addLogMessage(message) {
   const logContainer = document.getElementById("logContainer");
