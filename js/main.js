@@ -207,7 +207,7 @@ function setCameraStream(source) {
 // Start the camera selection process
 getCameras().then(start).then(() => {
   const backCamera = Array.from(videoSelect.options).find((option) =>
-    option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
+    option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
