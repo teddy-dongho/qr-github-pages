@@ -166,8 +166,12 @@ function getCameras() {
       if (backCamera) {
         videoSelect.value = backCamera.value;
       }
-
-      return setCameraStream(backCamera.value);
+      
+      try {
+        return setCameraStream(backCamera.value);
+      } catch (e) {
+        return setCameraStream();
+      }
     })
     .catch(function (err) {
       console.error("Error enumerating devices:", err);
@@ -201,7 +205,7 @@ getCameras().then(start).then(() => {
     videoSelect.value = backCamera.value;
   }
 
-  addLogMessage("backCamera: " + backCamera.value);
+  addLogMessage("backCamera: " + backCamera);
 }).then(start);
 
 function addLogMessage(message) {
