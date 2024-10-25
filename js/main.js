@@ -4,7 +4,6 @@ const videoElement = document.querySelector("video");
 const videoSelect = document.getElementById("videoSource");
 const toggleTorchButton = document.getElementById("toggle-torch");
 const selectors = [videoSelect];
-let stream;
 
 // 가져온 장치 목록을 업데이트하는 함수
 function gotDevices(deviceInfos) {
@@ -35,15 +34,6 @@ function gotDevices(deviceInfos) {
 }
 
 // 카메라 스트림 설정
-function gotStream(stream) {
-  window.stream = stream; // 스트림을 전역에서 사용할 수 있도록 설정
-  videoElement.srcObject = stream; // 비디오 요소에 스트림 할당
-  const track = stream.getVideoTracks()[0];
-  const imageCapture = new ImageCapture(track);
-  return navigator.mediaDevices.enumerateDevices();
-}
-
-// 카메라 플래시 설정
 function gotStream(stream) {
   window.stream = stream; // 스트림을 전역에서 사용할 수 있도록 설정
   videoElement.srcObject = stream; // 비디오 요소에 스트림 할당
@@ -83,17 +73,19 @@ function handleError(error) {
   );
 }
 
-// 카메라 선택 후 스트림 시작
-function start() {
-  if (window.stream) {
-    window.stream.getTracks().forEach((track) => track.stop());
-  }
+function getConstrains() {
   const videoSource = videoSelect.value;
   const constraints = {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
-  navigator.mediaDevices
-    .getUserMedia(constraints)
+  return constraints
+}
+
+// 카메라 선택 후 스트림 시작
+function start() {
+  stopStream();
+  return navigator.mediaDevices
+    .getUserMedia(getConstrains())
     .then(gotStream)
     .then(gotDevices)
     .then(applyTorch)
@@ -106,43 +98,15 @@ videoSelect.onchange = start;
 // 장치 목록 가져오기
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
-// QR 코드 스캔 시 호출되는 함수
-function onQRCodeScanned(scannedText) {
-  const scannedTextMemo = document.getElementById("scannedTextMemo");
-  if (scannedTextMemo) {
-    scannedTextMemo.value = scannedText;
-  }
-}
-
-// 비디오 스트림을 제공하는 함수
-function provideVideoQQ() {
-  const videoSource = videoSelect.value;
-  return navigator.mediaDevices.getUserMedia({
-    video: {
-      deviceId: videoSource ? { exact: videoSource } : undefined,
-    },
-  });
-}
-
-// JsQRScanner 초기화 함수
-function JsQRScannerReady() {
-  const jbScanner = new JsQRScanner(onQRCodeScanned, provideVideoQQ);
-  jbScanner.setSnapImageMaxSize(300);
-  const scannerParentElement = document.getElementById("scanner");
-  if (scannerParentElement) {
-    jbScanner.appendTo(scannerParentElement);
-  }
-}
-
 function stopStream() {
-  if (stream) {
-    stream.getTracks().forEach((track) => track.stop());
+  if (window.stream) {
+    window.stream.getTracks().forEach((track) => track.stop());
   }
 }
 
 // Get the available video input devices (cameras)
 function getCameras() {
-  navigator.mediaDevices
+  return navigator.mediaDevices
     .enumerateDevices()
     .then(function (devices) {
       const videoDevices = devices.filter(
@@ -156,7 +120,6 @@ function getCameras() {
         videoSelect.appendChild(option);
       });
 
-      // Try to select a camera with "back" in the label, otherwise select the first one
       const backCamera = Array.from(videoSelect.options).find((option) =>
         option.text.toLowerCase().includes("back")
       );
@@ -164,7 +127,7 @@ function getCameras() {
         videoSelect.value = backCamera.value;
       }
 
-      setCameraStream(videoSelect.value); // Set initial camera
+      setCameraStream(videoSelect.value);
     })
     .catch(function (err) {
       console.error("Error enumerating devices:", err);
@@ -174,18 +137,11 @@ function getCameras() {
 // Set the video stream from the selected camera
 function setCameraStream(deviceId) {
   stopStream(); // Stop previous stream if any
-
-  const constraints = {
-    video: {
-      deviceId: { exact: deviceId },
-    },
-  };
-
-  navigator.mediaDevices
-    .getUserMedia(constraints)
+  const userMediaPromise = navigator.mediaDevices.getUserMedia(getConstrains())
+  userMediaPromise
     .then(function (mediaStream) {
-      stream = mediaStream;
-      video.srcObject = stream;
+      window.stream = mediaStream;
+      video.srcObject = window.stream;
     })
     .catch(function (err) {
       console.error("Error accessing the camera:", err);
@@ -198,7 +154,4 @@ videoSelect.addEventListener("change", function () {
 });
 
 // Start the camera selection process
-getCameras();
-
-// 페이지가 로드되면 초기 스트림 설정 시작
-start();
+getCameras().then(start);
