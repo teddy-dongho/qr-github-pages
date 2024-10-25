@@ -124,7 +124,7 @@ function getConstrains(source) {
 // 카메라 선택 후 스트림 시작
 function start() {
   stopStream();
-  return getUserMedia()
+  return getUserMedia(videoSelect.value)
     .then(gotStream)
     .then(gotDevices)
     .then(applyTorch)
@@ -172,7 +172,8 @@ function getCameras() {
 
 // Set the video stream from the selected camera
 function setCameraStream(source) {
-  stopStream(); // Stop previous stream if any
+  console.log('setCameraStream', source);
+  stopStream();
   getUserMedia(source)
     .then(function (mediaStream) {
       video.srcObject = mediaStream;
@@ -182,10 +183,10 @@ function setCameraStream(source) {
     });
 }
 
-// Event listener for camera selection change
-videoSelect.addEventListener("change", function () {
-  setCameraStream(videoSelect.value);
-});
+// // Event listener for camera selection change
+// videoSelect.addEventListener("change", function () {
+//   setCameraStream(videoSelect.value);
+// });
 
 // Start the camera selection process
 getCameras().then(start);
