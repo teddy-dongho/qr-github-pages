@@ -152,7 +152,7 @@ function getCameras() {
       });
 
       const backCamera = Array.from(videoSelect.options).find((option) =>
-        option.text.toLowerCase().includes("back")
+        option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
       );
       if (backCamera) {
         videoSelect.value = backCamera.value;
