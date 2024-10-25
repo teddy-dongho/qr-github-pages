@@ -88,18 +88,20 @@ async function applyTorch() {
   if (capabilities.torch) {
     toggleTorchButton.addEventListener("click", () => {
       if (track) {
-        alert('toggle');
+        addLogMessage('toggle');
         const torchState = track.getSettings().torch || false;
         track.applyConstraints({
           advanced: [{ torch: !torchState }],
         });
       } else {
+        addLogMessage('track에 torch가 없습니다');
         alert("track에 torch가 없습니다");
       }
     });
   } else {
     console.log("This device does not support torch functionality.");
     toggleTorchButton.addEventListener("click", () => {
+      addLogMessage("torch가 지원되지 않습니다");
       alert("torch가 지원되지 않습니다");
     });
   }
@@ -157,6 +159,7 @@ function getCameras() {
         videoSelect.appendChild(option);
       });
 
+      addLogMessage(JSON.stringify(videoSelect.options));
       const backCamera = Array.from(videoSelect.options).find((option) =>
         option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
       );
@@ -192,7 +195,7 @@ function setCameraStream(source) {
 // Start the camera selection process
 getCameras().then(start).then(() => {
   const backCamera = Array.from(videoSelect.options).find((option) =>
-    option.text.toLowerCase().includes("Back") || option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
+    option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
@@ -200,3 +203,17 @@ getCameras().then(start).then(() => {
 
   start(backCamera);
 });
+
+function addLogMessage(message) {
+  const logContainer = document.getElementById("logContainer");
+  
+  // 새로운 로그 메시지 요소 생성
+  const logMessage = document.createElement("p");
+  logMessage.textContent = message;
+
+  // logContainer에 로그 메시지를 추가
+  logContainer.appendChild(logMessage);
+  
+  // 자동 스크롤
+  logContainer.scrollTop = logContainer.scrollHeight;
+}
