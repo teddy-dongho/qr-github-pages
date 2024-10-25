@@ -8,6 +8,7 @@ let stream;
 // 카메라 장치 목록을 업데이트하는 함수
 function gotDevices(deviceInfos) {
   videoSelect.innerHTML = ''; // 초기화
+
   for (const deviceInfo of deviceInfos) {
     if (deviceInfo.kind === "videoinput") {
       const option = document.createElement("option");
@@ -16,6 +17,18 @@ function gotDevices(deviceInfos) {
       videoSelect.appendChild(option);
     }
   }
+
+  // 'back'이 포함된 카메라가 있으면 후면 카메라로 기본 선택
+  const backCameraOption = Array.from(videoSelect.options).find((option) =>
+    option.text.toLowerCase().includes("back")
+  );
+
+  if (backCameraOption) {
+    videoSelect.value = backCameraOption.value;
+  }
+
+  // 선택한 카메라로 스트림 시작
+  start();
 }
 
 // 카메라 스트림을 가져오고 플래시 제어 설정
@@ -66,6 +79,3 @@ navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(console.error);
 
 // 비디오 장치 선택 변경 시 호출
 videoSelect.onchange = start;
-
-// 초기 카메라 스트림 시작
-start();
