@@ -152,9 +152,23 @@ function getCameras() {
       if (backCamera) {
         videoSelect.value = backCamera.value;
       }
+
+      setCameraStream();
     })
     .catch(function (err) {
       console.error("Error enumerating devices:", err);
+    });
+}
+
+// Set the video stream from the selected camera
+function setCameraStream() {
+  stopStream(); // Stop previous stream if any
+  getUserMedia()
+    .then(function (mediaStream) {
+      video.srcObject = mediaStream;
+    })
+    .catch(function (err) {
+      console.error("Error accessing the camera:", err);
     });
 }
 
