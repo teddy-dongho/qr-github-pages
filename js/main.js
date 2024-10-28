@@ -206,15 +206,18 @@ function setCameraStream(source) {
 // });
 
 // Start the camera selection process
-getCameras().then(start).then(() => {
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+getCameras().then(start).then(() => delay(500)).then(() => {
   const backCamera = Array.from(videoSelect.options).find((option) =>
     option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
+    addLogMessage("backCamera: " + backCamera.value);
   }
-
-  addLogMessage("backCamera: " + backCamera);
 }).then(start);
 
 function addLogMessage(message) {
