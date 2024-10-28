@@ -150,7 +150,8 @@ function getCameras() {
     );
       if (backCamera) {
         videoSelect.value = backCamera.value;
-        addLogMessage("backCamera: " + backCamera.label + " / " + backCamera.value);
+        addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
+
       }
       
       try {
@@ -193,7 +194,7 @@ getCameras().then(start).then(() => delay(500)).then(() => {
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
-    addLogMessage("backCamera: " + backCamera.label + " / " + backCamera.value);
+    addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
   }
 }).then(start);
 
@@ -204,9 +205,7 @@ function addLogMessage(message) {
   const logMessage = document.createElement("p");
   logMessage.textContent = message;
 
-  // logContainer에 로그 메시지를 추가
   logContainer.appendChild(logMessage);
   
-  // 자동 스크롤
   logContainer.scrollTop = logContainer.scrollHeight;
 }
