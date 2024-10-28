@@ -146,10 +146,11 @@ function getCameras() {
 
       addLogMessage(JSON.stringify(videoSelect.options));
       const backCamera = Array.from(videoSelect.options).find((option) =>
-        option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면")
-      );
+        option.text.toLowerCase().includes("Back Camera") || option.text.toLowerCase().includes("후면 카메라")
+    );
       if (backCamera) {
         videoSelect.value = backCamera.value;
+        addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
       }
       
       try {
@@ -168,7 +169,7 @@ function setCameraStream(source) {
   console.log('setCameraStream', source);
   stopStream();
   return getUserMedia(source)
-    .then(function (mediaStream) {
+    .then((mediaStream) => {
       video.srcObject = mediaStream;
     })
     .catch(function (err) {
@@ -188,11 +189,11 @@ function delay(ms) {
 
 getCameras().then(start).then(() => delay(500)).then(() => {
   const backCamera = Array.from(videoSelect.options).find((option) =>
-    option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
+    option.text.toLowerCase().includes("Back Camera") || option.text.toLowerCase().includes("후면 카메라")
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
-    addLogMessage("backCamera: " + backCamera.value);
+    addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
   }
 }).then(start);
 
