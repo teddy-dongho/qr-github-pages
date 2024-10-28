@@ -40,18 +40,6 @@ function getDevices() {
     console.log('devices', devices);
     return devices;
   });
-  return new Promise((resolve, reject) => {
-    if (window.devices != undefined) {
-      console.log('window.devices', window.devices);
-      resolve(window.devices);
-    } else {
-      return navigator.mediaDevices.enumerateDevices().then(devices => {
-        window.devices = devices;
-        console.log('devices', devices);
-        resolve(devices);
-      }).catch(e => reject(e));
-    }
-  });
 }
 
 // 카메라 스트림 설정
@@ -66,18 +54,6 @@ function getUserMedia(source) {
     window.stream = mediaStream;
     return mediaStream;
   })
-  // return new Promise((resolve, reject) => {
-  //   if (window.stream != undefined) {
-  //     console.log('window.stream', window.stream);
-  //     resolve(window.stream);
-  //   } else {
-  //     return navigator.mediaDevices.getUserMedia(getConstrains(source)).then((mediaStream) => {
-  //       console.log('mediaStream', mediaStream);
-  //       window.stream = mediaStream;
-  //       resolve(mediaStream);
-  //     }).catch(e => reject(e));
-  //   }
-  // });
 }
 
 async function applyTorch() {
@@ -86,34 +62,34 @@ async function applyTorch() {
   const capabilities = track.getCapabilities();
   console.log("capabilities.torch", capabilities.torch);
   addLogMessage("capabilities: " + JSON.stringify(capabilities));
-  if (capabilities.torch) {
-    toggleTorchButton.addEventListener("click", () => {
-      try {
-        if (track) {
-          addLogMessage('toggle');
-          const torchState = track.getSettings().torch || false;
-          track.applyConstraints({
-            advanced: [{ torch: !torchState }],
-          });
-        } else {
-          addLogMessage('track에 torch가 없습니다');
-          alert("track에 torch가 없습니다");
-        }
-      } catch (e) {
-        addLogMessage(e);
-      }
-    });
-  } else {
-    console.log("This device does not support torch functionality.");
-    try {
-      toggleTorchButton.addEventListener("click", () => {
-        addLogMessage("torch가 지원되지 않습니다");
-        alert("torch가 지원되지 않습니다");
-      });
-    } catch (e) {
-      addLogMessage(e);
-    }
-  }
+  // if (capabilities.torch) {
+  //   toggleTorchButton.addEventListener("click", () => {
+  //     try {
+  //       if (track) {
+  //         addLogMessage('toggle');
+  //         const torchState = track.getSettings().torch || false;
+  //         track.applyConstraints({
+  //           advanced: [{ torch: !torchState }],
+  //         });
+  //       } else {
+  //         addLogMessage('track에 torch가 없습니다');
+  //         alert("track에 torch가 없습니다");
+  //       }
+  //     } catch (e) {
+  //       addLogMessage(e);
+  //     }
+  //   });
+  // } else {
+  //   console.log("This device does not support torch functionality.");
+  //   try {
+  //     toggleTorchButton.addEventListener("click", () => {
+  //       addLogMessage("torch가 지원되지 않습니다");
+  //       alert("torch가 지원되지 않습니다");
+  //     });
+  //   } catch (e) {
+  //     addLogMessage(e);
+  //   }
+  // }
 }
 
 // 오류 처리 함수
