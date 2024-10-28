@@ -123,9 +123,9 @@ function start(source) {
 videoSelect.onchange = () => start();
 
 function stopStream() {
-  // if (window.stream) {
-  //   window.stream.getTracks().forEach((track) => track.stop());
-  // }
+  if (window.stream) {
+    window.stream.getTracks().forEach((track) => track.stop());
+  }
 }
 
 // Get the available video input devices (cameras)
@@ -158,7 +158,7 @@ function setCameraStream(source) {
   stopStream();
   return getUserMedia(source)
     .then((mediaStream) => {
-      video.srcObject = mediaStream;
+      videoElement.srcObject = mediaStream;
     })
     .catch(function (err) {
       console.error("Error accessing the camera:", err);
