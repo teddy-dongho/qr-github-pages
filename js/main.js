@@ -123,9 +123,9 @@ function start(source) {
 videoSelect.onchange = () => start();
 
 function stopStream() {
-  if (window.stream) {
-    window.stream.getTracks().forEach((track) => track.stop());
-  }
+  // if (window.stream) {
+  //   window.stream.getTracks().forEach((track) => track.stop());
+  // }
 }
 
 // Get the available video input devices (cameras)
