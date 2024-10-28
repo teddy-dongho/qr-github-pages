@@ -82,6 +82,7 @@ function getUserMedia(source) {
 
 async function applyTorch() {
   const track = window.stream.getVideoTracks()[0];
+  addLogMessage("track settings: " + JSON.stringify(track.getSettings()));
   const capabilities = track.getCapabilities();
   console.log("capabilities.torch", capabilities.torch);
   addLogMessage("capabilities: " + JSON.stringify(capabilities));
