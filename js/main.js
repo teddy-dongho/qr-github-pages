@@ -151,7 +151,6 @@ function getCameras() {
       if (backCamera) {
         videoSelect.value = backCamera.value;
         addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
-
       }
       
       try {
@@ -205,7 +204,9 @@ function addLogMessage(message) {
   const logMessage = document.createElement("p");
   logMessage.textContent = message;
 
+  // logContainer에 로그 메시지를 추가
   logContainer.appendChild(logMessage);
   
+  // 자동 스크롤
   logContainer.scrollTop = logContainer.scrollHeight;
 }
