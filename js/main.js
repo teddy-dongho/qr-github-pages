@@ -150,7 +150,7 @@ function getCameras() {
     );
       if (backCamera) {
         videoSelect.value = backCamera.value;
-        addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
+        addLogMessage("backCamera: " + backCamera.label + " / " + backCamera.value);
       }
       
       try {
@@ -193,7 +193,7 @@ getCameras().then(start).then(() => delay(500)).then(() => {
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
-    addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
+    addLogMessage("backCamera: " + backCamera.label + " / " + backCamera.value);
   }
 }).then(start);
 
