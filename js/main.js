@@ -82,9 +82,9 @@ function getUserMedia(source) {
 
 async function applyTorch() {
   const track = window.stream.getVideoTracks()[0];
-  const imageCapture = new ImageCapture(track);
-  const capabilities = await imageCapture.getPhotoCapabilities();
+  const capabilities = track.getCapabilities();
   console.log("capabilities.torch", capabilities.torch);
+  addLogMessage("capabilities: " + JSON.stringify(capabilities));
   if (capabilities.torch) {
     toggleTorchButton.addEventListener("click", () => {
       try {
