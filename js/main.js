@@ -146,7 +146,7 @@ function getCameras() {
 
       addLogMessage(JSON.stringify(videoSelect.options));
       const backCamera = Array.from(videoSelect.options).find((option) =>
-        option.text.toLowerCase().includes("Back Camera") || option.text.toLowerCase().includes("후면 카메라")
+        option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
     );
       if (backCamera) {
         videoSelect.value = backCamera.value;
@@ -189,7 +189,7 @@ function delay(ms) {
 
 getCameras().then(start).then(() => delay(500)).then(() => {
   const backCamera = Array.from(videoSelect.options).find((option) =>
-    option.text.toLowerCase().includes("Back Camera") || option.text.toLowerCase().includes("후면 카메라")
+    option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
   );
   if (backCamera) {
     videoSelect.value = backCamera.value;
