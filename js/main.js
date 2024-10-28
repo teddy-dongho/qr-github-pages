@@ -175,7 +175,7 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-getCameras().then(start)
+getCameras().then(() => start());
 // .then(() => delay(500)).then(start);
 
 function addLogMessage(message) {
