@@ -145,18 +145,6 @@ function getCameras() {
       });
 
       addLogMessage(JSON.stringify(videoSelect.options));
-      // const backCamera = Array.from(videoSelect.options).find((option) =>
-      //   option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
-      // );
-      // if (backCamera) {
-      //   videoSelect.value = backCamera.value;
-      //   addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
-      // }
-      
-      // try {
-        // return setCameraStream(backCamera.value);
-      // } catch (e) {
-      // }
       return setCameraStream();
     })
     .catch(function (err) {
@@ -187,17 +175,7 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-getCameras().then(start).then(() => delay(500))
-// .then(() => {
-//   const backCamera = Array.from(videoSelect.options).find((option) =>
-//     option.text.toLowerCase().includes("back") || option.text.toLowerCase().includes("후면 카메라")
-//   );
-//   if (backCamera) {
-//     videoSelect.value = backCamera.value;
-//     addLogMessage("backCamera: " + backCamera.text + " / " + backCamera.value);
-//   }
-// })
-.then(start);
+getCameras().then(start).then(() => delay(500)).then(start);
 
 function addLogMessage(message) {
   const logContainer = document.getElementById("logContainer");
