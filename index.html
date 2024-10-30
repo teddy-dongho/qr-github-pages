@@ -121,5 +121,30 @@
     <div class="footer">
         This is a fixed footer
     </div>
+
+    <script>
+        // Function to get GPS location
+        function getLocation() {
+          const locationElement = document.getElementById('location');
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const { latitude, longitude } = position.coords;
+                locationElement.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
+              },
+              (error) => {
+                locationElement.textContent = `Error: ${error.message}`;
+              }
+            );
+          } else {
+            locationElement.textContent = 'Geolocation is not supported by this browser.';
+          }
+        }
+    
+        // Function to navigate to a specific URL
+        function navigateToUrl() {
+          window.location.href = "https://georapbox.github.io/capture-photo-element/";
+        }
+    </script>
 </body>
 </html>
